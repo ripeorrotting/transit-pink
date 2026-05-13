@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CTtransit Digital Ticket</title>
+    <style>
+        body {
+            margin: 0;
+            background: #f3f3f3;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #2f3136;
+            overflow-x: hidden;
+        }
+
+        .screen {
+            width: 100%;
+            max-width: 828px;
+            margin: 0 auto;
+            min-height: 100vh;
+            position: relative;
+            background: #f3f3f3;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 40px;
+            right: 34px;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: #ffffff;
+            box-shadow: 0 2px 10px rgba(0,0,0,.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 42px;
+            color: #4a4a4a;
+            font-weight: 300;
+            cursor: pointer;
+        }
+
+        .content {
+            padding: 160px 52px 80px;
+        }
+
+        .title {
+            font-size: 58px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .subtitle {
+            font-size: 34px;
+            color: #3d3d3d;
+            margin-top: 8px;
+            font-weight: 400;
+        }
+
+        .ring-wrap {
+            display: flex;
+            justify-content: center;
+            margin: 90px 0 80px;
+        }
+
+        .ring {
+            width: 290px;
+            height: 290px;
+            border-radius: 50%;
+            background: #cf2e83;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset -8px -12px 0 rgba(0,0,0,.12),
+                        0 0 40px rgba(207, 46, 131, 0.4);
+            animation: timePulse 1s ease-in-out infinite;
+            position: relative;
+        }
+
+        .ring-inner {
+            width: 190px;
+            height: 190px;
+            border-radius: 50%;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 28px;
+            color: #333;
+            box-shadow: 0 6px 14px rgba(0,0,0,.18);
+            z-index: 2;
+        }
+
+        @keyframes timePulse {
+            0% { transform: scale(1); }
+            45% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+
+        .time {
+            text-align: center;
+            font-size: 105px;
+            font-weight: 700;
+            letter-spacing: -3px;
+            color: #34373d;
+            margin-bottom: 50px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .ticket-card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0,0,0,.15);
+            padding: 34px 38px 40px;
+        }
+
+        .ticket-title {
+            font-size: 38px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        .ticket-desc {
+            font-size: 24px;
+            line-height: 1.4;
+            color: #666;
+        }
+
+        .expiry {
+            margin-top: 48px;
+            font-size: 30px;
+            font-weight: 700;
+            color: #444;
+        }
+
+        @media (max-width: 700px) {
+            .content { padding: 110px 26px 50px; }
+            .title { font-size: 38px; }
+            .subtitle { font-size: 22px; }
+            .ring { width: 220px; height: 220px; }
+            .ring-inner { width: 140px; height: 140px; font-size: 20px; }
+            .time { font-size: 76px; margin-bottom: 30px; }
+            .ticket-title { font-size: 26px; }
+            .ticket-desc { font-size: 18px; }
+            .expiry { font-size: 22px; }
+            .close-btn { width: 52px; height: 52px; font-size: 30px; top: 24px; right: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="screen">
+    <div class="close-btn" onclick="window.close()">×</div>
+
+    <div class="content">
+        <h1 class="title">CT Transit</h1>
+        <div class="subtitle">Show operator your ticket</div>
+
+        <div class="ring-wrap">
+            <div class="ring">
+                <div class="ring-inner">CT Transit</div>
+            </div>
+        </div>
+
+        <div class="time" id="clock">0:00:00 AM</div>
+
+        <div class="ticket-card">
+            <div class="ticket-title">Adult 2 Hour - Local Service</div>
+            <div class="ticket-desc">
+                Hartford, New Haven, Stamford, Bristol, Meriden, New Britain, Wallingford, and Waterbury
+            </div>
+            <div class="expiry" id="expiry">Expires...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateClock() {
+        const now = new Date();
+        const options = {
+            hour: 'numeric',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+        };
+        document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', options);
+    }
+
+    function setExpiry() {
+        // Sets expiry for 2 hours from the moment the page is loaded
+        const now = new Date();
+        const expiryDate = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+
+        const dateOptions = { month: 'long', day: 'numeric', year: 'numeric' };
+        const timeOptions = { hour: 'numeric', minute: '2-digit', hour12: true };
+
+        const formattedDate = expiryDate.toLocaleDateString('en-US', dateOptions);
+        const formattedTime = expiryDate.toLocaleTimeString('en-US', timeOptions);
+
+        document.getElementById('expiry').textContent = `Expires ${formattedDate} at ${formattedTime}`;
+    }
+
+    // Initialize
+    updateClock();
+    setExpiry();
+    setInterval(updateClock, 1000);
+</script>
+
+</body>
+</html>
